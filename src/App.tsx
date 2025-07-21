@@ -45,6 +45,12 @@ import FallbackAppRender from './views/FallbackErrorBoundary';
 import FallbackSuspense from './views/FallbackSuspense';
 import Dashboard from './pages/main/Dashboard';
 import SpeakerDisplay from './pages/speaker/SpeakerDisplay';
+import LoginPage from './pages/auth/LoginPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import { SidebarTimerWidget } from './pages/main/widgets/SidebarTimerWidget';
+import { useUserStore } from './stores/userStore';
+import { IconLogout, IconUser as IconUserProfile } from '@tabler/icons-react';
+import { ResizableAside } from './components/ResizableAside';
 // if some views are large, you can use lazy loading to reduce the initial app load time
 const LazyView = lazy(() => import('./views/LazyView'));
 
@@ -60,10 +66,16 @@ export default function () {
   const { t } = useTranslation();
   // check if using custom titlebar to adjust other components
   const { usingCustomTitleBar } = useTauriContext();
+  
+  // Sistema de usuarios
+  const { session, isAdmin, logout } = useUserStore();
+  const isAuthenticated = session.isAuthenticated;
+  const currentUser = session.currentUser;
 
-  // left sidebar
-  const views: View[] = [
+  // left sidebar - solo mostrar si está autenticado
+  const views: View[] = isAuthenticated ? [
     { component: Dashboard, path: '/dashboard', name: 'Dashboard' },
+    ...(isAdmin() ? [{ component: UserManagementPage, path: '/users', name: 'Usuarios' }] : []),
     { component: ExampleView, path: '/example-view', name: t('ExampleView') },
     {
       component: () => <Text>Woo, routing works</Text>,
@@ -71,14 +83,12 @@ export default function () {
       name: 'Test Routing',
     },
     { component: LazyView, path: '/lazy-view', name: 'Lazy Load' },
-    // Other ways to add views to this array:
-    //     { component: () => <Home prop1={'stuff'} />, path: '/home', name: t('Home') },
-    //     { component: React.memo(About), path: '/about', name: t('About') },
-  ];
+  ] : [];
 
   // Special fullscreen routes that don't use the main app layout
   const fullscreenRoutes: View[] = [
     { component: () => <SpeakerDisplay isFullscreen={true} />, path: '/speaker-display', name: 'Pantalla Orador' },
+    { component: LoginPage, path: '/login', name: 'Login' },
   ];
 
   const { toggleColorScheme } = useMantineColorScheme();
@@ -283,10 +293,14 @@ export default function () {
           />
         ))}
         
-        {/* Main app with AppShell */}
-        <Route
-          path="/*"
-          element={
+        {/* Redirect to login if not authenticated */}
+        {!isAuthenticated && <Route path="/*" element={<Navigate to="/login" />} />}
+        
+        {/* Main app with AppShell - only show if authenticated */}
+        {isAuthenticated && (
+          <Route
+            path="/*"
+            element={
             <AppShell
         padding="md"
         header={{ height: 60 }}
@@ -297,7 +311,7 @@ export default function () {
           collapsed: { mobile: !mobileNavOpened, desktop: !desktopNavOpened },
         }}
         aside={{
-          width: 300,
+          width: { base: 280, sm: 320, md: 350, lg: 400 },
           breakpoint: 'md',
           collapsed: { desktop: false, mobile: true },
         }}
@@ -356,9 +370,27 @@ export default function () {
               onClick={toggleDesktopNav}
               size="sm"
             />
-            <Text>HEADER_TITLE</Text>
+            <Text>Multimedia Presentation App</Text>
           </Group>
           <Group className={classes.headerRightItems} h="110%">
+            {isAuthenticated && currentUser && (
+              <>
+                <Group gap="xs">
+                  <IconUserProfile size={16} />
+                  <Text size="sm">{currentUser.displayName}</Text>
+                  <Text size="xs" c="dimmed">({currentUser.role})</Text>
+                </Group>
+                <ActionIcon
+                  variant="light"
+                  color="red"
+                  onClick={logout}
+                  title="Cerrar Sesión"
+                  size={30}
+                >
+                  <IconLogout size={16} />
+                </ActionIcon>
+              </>
+            )}
             <LanguageHeaders />
             <ActionIcon
               id="toggle-theme"
@@ -394,11 +426,8 @@ export default function () {
         </AppShell.Navbar>
 
         <AppShell.Aside className={classes.titleBarAdjustedHeight} p="md">
-          <Text>
-            Right Side. Use for help, support, quick action menu? For example,
-            if we were building a trading app, we could use the aside for the
-            trade parameters while leaving the main UI with the data
-          </Text>
+          {/* Cronómetro del Operador en Sidebar */}
+          <SidebarTimerWidget />
         </AppShell.Aside>
 
         {showFooter && (
@@ -416,8 +445,9 @@ export default function () {
           </AppShell.Footer>
         )}
       </AppShell>
-          }
-        />
+            }
+          />
+        )}
       </Routes>
     </>
   );

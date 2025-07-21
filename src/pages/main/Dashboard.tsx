@@ -30,7 +30,6 @@ import { SystemStatusWidget } from './widgets/SystemStatusWidget';
 import { UpcomingMeetingsWidget } from './widgets/UpcomingMeetingsWidget';
 import { ContentLibraryWidget } from './widgets/ContentLibraryWidget';
 import { DisplayPreviewWidget } from './widgets/DisplayPreviewWidget';
-import { SimpleTimerWidget } from './widgets/SimpleTimerWidget';
 import { NotificationsWidget } from './widgets/NotificationsWidget';
 
 export default function Dashboard() {
@@ -339,12 +338,8 @@ export default function Dashboard() {
           />
         </Grid.Col>
 
-        {/* Fila 4: Timer y Notificaciones */}
-        <Grid.Col span={{ base: 12, md: 5 }}>
-          <SimpleTimerWidget />
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 7 }}>
+        {/* Fila 4: Notificaciones (el cronómetro está ahora en el sidebar) */}
+        <Grid.Col span={{ base: 12, md: 12 }}>
           <NotificationsWidget
             notifications={notifications}
             onNotificationRead={id => console.log('Mark as read:', id)}
