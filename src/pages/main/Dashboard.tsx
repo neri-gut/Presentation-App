@@ -22,10 +22,14 @@ import {
 
 import { useUserStore } from '../../stores/userStore';
 import { useMeetingStore } from '../../stores/meetingStore';
+import { useMediaStore } from '../../stores/mediaStore';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { session } = useUserStore();
   const { currentTemplate, timerState } = useMeetingStore();
+  const { library, currentMedia, playbackState } = useMediaStore();
   const currentUser = session.currentUser;
 
   const handleOpenSpeakerDisplay = () => {
@@ -34,13 +38,13 @@ export default function Dashboard() {
   };
 
   const handleStartPresentation = () => {
-    // TODO: Implementar inicio de presentación
-    console.log('Iniciar presentación');
+    // Navegar a la biblioteca de medios
+    navigate('/media');
   };
 
   const handleManageMedia = () => {
-    // TODO: Implementar gestión de medios
-    console.log('Gestionar medios');
+    // Navegar a la biblioteca de medios
+    navigate('/media');
   };
 
   return (
@@ -175,14 +179,38 @@ export default function Dashboard() {
               </Stack>
             </Card>
 
-            {/* Próximas Funcionalidades */}
+            {/* Biblioteca Multimedia */}
             <Card withBorder shadow="sm" p="lg">
-              <Title order={4} mb="md">Próximas Funcionalidades</Title>
+              <Title order={4} mb="md">Biblioteca Multimedia</Title>
               <Stack gap="xs">
-                <Text size="sm" c="dimmed">• Biblioteca de medios</Text>
-                <Text size="sm" c="dimmed">• Presentaciones automáticas</Text>
-                <Text size="sm" c="dimmed">• Reportes de reuniones</Text>
-                <Text size="sm" c="dimmed">• Configuración avanzada</Text>
+                <Group justify="space-between">
+                  <Text size="sm">Total archivos:</Text>
+                  <Text size="sm" fw={500}>{library.totalFiles}</Text>
+                </Group>
+                
+                <Group justify="space-between">
+                  <Text size="sm">Colecciones:</Text>
+                  <Text size="sm" fw={500}>{library.collections.length}</Text>
+                </Group>
+                
+                <Group justify="space-between">
+                  <Text size="sm">Tamaño total:</Text>
+                  <Text size="sm" fw={500}>
+                    {(library.totalSize / (1024 * 1024)).toFixed(1)} MB
+                  </Text>
+                </Group>
+
+                {currentMedia && (
+                  <>
+                    <Text size="sm" mt="md" fw={500}>Reproduciendo:</Text>
+                    <Text size="xs" c="dimmed" lineClamp={2}>
+                      {currentMedia.metadata.title || currentMedia.name}
+                    </Text>
+                    <Text size="xs" c={playbackState.isPlaying ? 'green' : 'gray'}>
+                      {playbackState.isPlaying ? 'En reproducción' : 'Pausado'}
+                    </Text>
+                  </>
+                )}
               </Stack>
             </Card>
           </Stack>

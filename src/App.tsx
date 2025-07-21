@@ -45,6 +45,7 @@ import Dashboard from './pages/main/Dashboard';
 import SpeakerDisplay from './pages/speaker/SpeakerDisplay';
 import LoginPage from './pages/auth/LoginPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import MediaLibraryPage from './pages/media/MediaLibraryPage';
 import { SidebarTimerWidget } from './pages/main/widgets/SidebarTimerWidget';
 import { useUserStore } from './stores/userStore';
 import { IconLogout, IconUser as IconUserProfile } from '@tabler/icons-react';
@@ -78,6 +79,7 @@ export default function () {
   // left sidebar - solo mostrar si está autenticado
   const views: View[] = isAuthenticated ? [
     { component: Dashboard, path: '/dashboard', name: 'Dashboard' },
+    { component: MediaLibraryPage, path: '/media', name: 'Biblioteca Multimedia' },
     ...(isAdmin() ? [{ component: UserManagementPage, path: '/users', name: 'Usuarios' }] : []),
   ] : [];
 
@@ -235,7 +237,7 @@ export default function () {
       <NavLink
         to={view.path}
         key={index}
-        end={view.exact}
+        end={view.exact || false}
         onClick={() => toggleMobileNav()}
         className={({ isActive }) =>
           classes.navLink +
@@ -300,7 +302,7 @@ export default function () {
             <AppShell
         padding="md"
         header={{ height: 60 }}
-        footer={showFooter ? { height: 60 } : undefined}
+        footer={showFooter ? { height: 60 } : {}}
         navbar={{
           width: 200,
           breakpoint: 'sm',
