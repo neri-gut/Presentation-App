@@ -50,7 +50,7 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import { SidebarTimerWidget } from './pages/main/widgets/SidebarTimerWidget';
 import { useUserStore } from './stores/userStore';
 import { IconLogout, IconUser as IconUserProfile } from '@tabler/icons-react';
-import { ResizableAside } from './components/ResizableAside';
+import { useResizableAside } from './hooks/useResizableAside';
 // if some views are large, you can use lazy loading to reduce the initial app load time
 const LazyView = lazy(() => import('./views/LazyView'));
 
@@ -71,6 +71,13 @@ export default function () {
   const { session, isAdmin, logout } = useUserStore();
   const isAuthenticated = session.isAuthenticated;
   const currentUser = session.currentUser;
+
+  // Hook para sidebar redimensionable
+  const { width, ResizeHandle, asideProps } = useResizableAside({
+    initialWidth: 350,
+    minWidth: 250,
+    maxWidthPercent: 0.75
+  });
 
   // left sidebar - solo mostrar si está autenticado
   const views: View[] = isAuthenticated ? [
@@ -311,7 +318,7 @@ export default function () {
           collapsed: { mobile: !mobileNavOpened, desktop: !desktopNavOpened },
         }}
         aside={{
-          width: { base: 280, sm: 320, md: 350, lg: 400 },
+          ...asideProps,
           breakpoint: 'md',
           collapsed: { desktop: false, mobile: true },
         }}
@@ -426,6 +433,9 @@ export default function () {
         </AppShell.Navbar>
 
         <AppShell.Aside className={classes.titleBarAdjustedHeight} p="md">
+          {/* Handle de redimensionamiento */}
+          <ResizeHandle />
+          
           {/* Cronómetro del Operador en Sidebar */}
           <SidebarTimerWidget />
         </AppShell.Aside>
