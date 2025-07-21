@@ -1,0 +1,3 @@
+DATABASE_URL="BLUB"
+DATABASE_URL2="?schema=query-builder-to-sql"
+

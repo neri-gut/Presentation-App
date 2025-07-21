@@ -1,0 +1,39 @@
+{
+  "recommendations": [
+    // ESLint and Prettier
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    
+    // TypeScript and React
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    
+    // Rust and Tauri
+    "rust-lang.rust-analyzer",
+    "tauri-apps.tauri-vscode",
+    
+    // Git
+    "mhutchie.git-graph",
+    "eamodio.gitlens",
+    
+    // Utilities
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-json",
+    "gruntfuggly.todo-tree",
+    "ms-vscode.vscode-todo-highlight",
+    "oderwat.indent-rainbow",
+    
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    "ms-vscode.vscode-markdown",
+    
+    // Docker (para DevContainer)
+    "ms-vscode.vscode-docker"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "ms-vscode.vscode-css"
+  ]
+}
