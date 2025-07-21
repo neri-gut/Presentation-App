@@ -39,7 +39,7 @@
     "beforeDevCommand": "pnpm start",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../build",
-    "devUrl": "http://localhost:1420"
+    "devUrl": "http://localhost:3001"
   },
   "productName": "Multimedia Presentation App",
   "mainBinaryName": "multimedia-presentation-app",
@@ -65,7 +65,7 @@
         "minHeight": 600,
         "resizable": true,
         "fullscreen": false,
-        "visible": false,
+        "visible": true,
         "decorations": true,
         "alwaysOnTop": false,
         "useHttpsScheme": true

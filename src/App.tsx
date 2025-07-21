@@ -44,6 +44,7 @@ import ExampleView from './views/ExampleView';
 import FallbackAppRender from './views/FallbackErrorBoundary';
 import FallbackSuspense from './views/FallbackSuspense';
 import Dashboard from './pages/main/Dashboard';
+import SpeakerDisplay from './pages/speaker/SpeakerDisplay';
 // if some views are large, you can use lazy loading to reduce the initial app load time
 const LazyView = lazy(() => import('./views/LazyView'));
 
@@ -73,6 +74,11 @@ export default function () {
     // Other ways to add views to this array:
     //     { component: () => <Home prop1={'stuff'} />, path: '/home', name: t('Home') },
     //     { component: React.memo(About), path: '/about', name: t('About') },
+  ];
+
+  // Special fullscreen routes that don't use the main app layout
+  const fullscreenRoutes: View[] = [
+    { component: () => <SpeakerDisplay isFullscreen={true} />, path: '/speaker-display', name: 'Pantalla Orador' },
   ];
 
   const { toggleColorScheme } = useMantineColorScheme();
@@ -257,7 +263,31 @@ export default function () {
   return (
     <>
       {usingCustomTitleBar && <TitleBar />}
-      <AppShell
+      
+      {/* Fullscreen routes that don't use AppShell */}
+      <Routes>
+        {fullscreenRoutes.map((route, index) => (
+          <Route
+            key={`fullscreen-${index}`}
+            path={route.path}
+            element={
+              <ErrorBoundary
+                FallbackComponent={FallbackAppRender}
+                onError={e => tauriLogger.error(e.message)}
+              >
+                <Suspense fallback={<FallbackSuspense />}>
+                  <route.component />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+        ))}
+        
+        {/* Main app with AppShell */}
+        <Route
+          path="/*"
+          element={
+            <AppShell
         padding="md"
         header={{ height: 60 }}
         footer={showFooter ? { height: 60 } : undefined}
@@ -386,6 +416,9 @@ export default function () {
           </AppShell.Footer>
         )}
       </AppShell>
+          }
+        />
+      </Routes>
     </>
   );
 }

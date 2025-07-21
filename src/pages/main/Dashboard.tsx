@@ -30,7 +30,7 @@ import { SystemStatusWidget } from './widgets/SystemStatusWidget';
 import { UpcomingMeetingsWidget } from './widgets/UpcomingMeetingsWidget';
 import { ContentLibraryWidget } from './widgets/ContentLibraryWidget';
 import { DisplayPreviewWidget } from './widgets/DisplayPreviewWidget';
-import { TimerWidget } from './widgets/TimerWidget';
+import { SimpleTimerWidget } from './widgets/SimpleTimerWidget';
 import { NotificationsWidget } from './widgets/NotificationsWidget';
 
 export default function Dashboard() {
@@ -341,14 +341,7 @@ export default function Dashboard() {
 
         {/* Fila 4: Timer y Notificaciones */}
         <Grid.Col span={{ base: 12, md: 5 }}>
-          <TimerWidget
-            timer={timerState}
-            onStart={() => console.log('Timer start')}
-            onPause={() => console.log('Timer pause')}
-            onStop={() => console.log('Timer stop')}
-            onReset={() => console.log('Timer reset')}
-            onConfigure={() => console.log('Configure timer')}
-          />
+          <SimpleTimerWidget />
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 7 }}>
