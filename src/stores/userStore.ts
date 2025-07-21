@@ -42,7 +42,7 @@ interface UserStore {
 const defaultAdmin: User = {
   id: 'admin-default',
   username: 'admin',
-  displayName: 'Administrador',
+  displayName: 'Juan Pérez (Admin)',
   email: 'admin@presentation-app.local',
   role: 'admin',
   permissions: DEFAULT_PERMISSIONS.admin.map(action => ({
@@ -60,7 +60,7 @@ const defaultAdmin: User = {
 const defaultOperator: User = {
   id: 'operator-default',
   username: 'operador',
-  displayName: 'Operador Principal',
+  displayName: 'María González (Operador)',
   role: 'operator',
   permissions: DEFAULT_PERMISSIONS.operator.map(action => ({
     action,

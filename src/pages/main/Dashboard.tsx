@@ -1,353 +1,191 @@
-import { useEffect, useState } from 'react';
 import {
-  Grid,
   Container,
   Title,
   Text,
   Group,
+  Grid,
+  Card,
+  Button,
   ActionIcon,
   Tooltip,
-  LoadingOverlay,
+  Stack,
 } from '@mantine/core';
-import { IconSettings, IconRefresh, IconMaximize } from '@tabler/icons-react';
+import { 
+  IconSettings, 
+  IconRefresh, 
+  IconMaximize,
+  IconPresentation,
+  IconVideo,
+  IconPhoto,
+  IconUsers
+} from '@tabler/icons-react';
 
-import { useAppStore } from '../../stores/appStore';
-import type {
-  QuickAction,
-  RecentPresentation,
-  SystemStatus,
-  UpcomingMeeting,
-  ContentLibraryStats,
-  DisplayPreview,
-  TimerState,
-  DashboardNotification,
-} from '../../types/dashboard';
-
-// Import de widgets (los crearemos después)
-import { QuickActionsWidget } from './widgets/QuickActionsWidget';
-import { RecentPresentationsWidget } from './widgets/RecentPresentationsWidget';
-import { SystemStatusWidget } from './widgets/SystemStatusWidget';
-import { UpcomingMeetingsWidget } from './widgets/UpcomingMeetingsWidget';
-import { ContentLibraryWidget } from './widgets/ContentLibraryWidget';
-import { DisplayPreviewWidget } from './widgets/DisplayPreviewWidget';
-import { NotificationsWidget } from './widgets/NotificationsWidget';
+import { useUserStore } from '../../stores/userStore';
+import { useMeetingStore } from '../../stores/meetingStore';
 
 export default function Dashboard() {
-  const { isLoading, setCurrentView, currentUser } = useAppStore();
-  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const { session } = useUserStore();
+  const { currentTemplate, timerState } = useMeetingStore();
+  const currentUser = session.currentUser;
 
-  // Estados locales para datos del dashboard
-  const [quickActions] = useState<QuickAction[]>([
-    {
-      id: '1',
-      label: 'Iniciar Presentación',
-      icon: 'presentation',
-      action: 'start-presentation',
-      shortcut: 'Ctrl+P',
-      isEnabled: true,
-    },
-    {
-      id: '2',
-      label: 'Biblioteca de Música',
-      icon: 'music',
-      action: 'open-music-library',
-      shortcut: 'Ctrl+M',
-      isEnabled: true,
-    },
-    {
-      id: '3',
-      label: 'Configurar Pantallas',
-      icon: 'display',
-      action: 'configure-displays',
-      shortcut: 'Ctrl+D',
-      isEnabled: true,
-    },
-    {
-      id: '4',
-      label: 'Buscar en Biblia',
-      icon: 'book',
-      action: 'search-bible',
-      shortcut: 'Ctrl+B',
-      isEnabled: true,
-    },
-  ]);
-
-  const [recentPresentations] = useState<RecentPresentation[]>([
-    {
-      id: '1',
-      title: 'Reunión Vida y Ministerio - Semana 1',
-      date: new Date('2025-01-15'),
-      duration: 120,
-      tags: ['midweek', 'clam'],
-    },
-    {
-      id: '2',
-      title: 'Reunión Fin de Semana - Enero',
-      date: new Date('2025-01-12'),
-      duration: 180,
-      tags: ['weekend', 'watchtower'],
-    },
-  ]);
-
-  const [systemStatus] = useState<SystemStatus>({
-    displays: {
-      connected: 3,
-      active: 2,
-      errors: 0,
-    },
-    content: {
-      downloaded: 145,
-      pending: 5,
-      lastSync: new Date(),
-    },
-    performance: {
-      cpu: 25,
-      memory: 60,
-      storage: 78,
-    },
-  });
-
-  const [upcomingMeetings] = useState<UpcomingMeeting[]>([
-    {
-      id: '1',
-      title: 'Reunión Vida y Ministerio',
-      date: new Date('2025-01-22T19:00:00'),
-      type: 'midweek',
-      duration: 120,
-      isReady: true,
-      materials: ['Programa', 'Videos', 'Música'],
-    },
-    {
-      id: '2',
-      title: 'Reunión Fin de Semana',
-      date: new Date('2025-01-25T10:00:00'),
-      type: 'weekend',
-      duration: 180,
-      isReady: false,
-      materials: ['Atalaya', 'Cánticos'],
-    },
-  ]);
-
-  const [contentStats] = useState<ContentLibraryStats>({
-    music: {
-      total: 151,
-      downloaded: 151,
-    },
-    publications: {
-      total: 50,
-      downloaded: 45,
-    },
-    bible: {
-      translations: 5,
-      verses: 31102,
-    },
-  });
-
-  const [displays] = useState<DisplayPreview[]>([
-    {
-      id: '1',
-      name: 'Pantalla Principal',
-      type: 'audience',
-      isActive: true,
-      currentContent: 'Cántico 1 - Jehová es mi Pastor',
-    },
-    {
-      id: '2',
-      name: 'Monitor Orador',
-      type: 'speaker',
-      isActive: true,
-      currentContent: 'Notas de la presentación',
-    },
-    {
-      id: '3',
-      name: 'Panel Operador',
-      type: 'operator',
-      isActive: false,
-      currentContent: null,
-    },
-  ]);
-
-  const [timerState] = useState<TimerState>({
-    isRunning: false,
-    currentTime: 0,
-    totalTime: 7200, // 2 horas
-    type: 'meeting',
-    title: 'Reunión Vida y Ministerio',
-  });
-
-  const [notifications] = useState<DashboardNotification[]>([
-    {
-      id: '1',
-      type: 'info',
-      title: 'Contenido actualizado',
-      message: 'Se han descargado 5 nuevas publicaciones',
-      timestamp: new Date(),
-      isRead: false,
-    },
-    {
-      id: '2',
-      type: 'warning',
-      title: 'Pantalla desconectada',
-      message: 'La pantalla secundaria se ha desconectado',
-      timestamp: new Date(Date.now() - 300000), // 5 min ago
-      isRead: false,
-    },
-  ]);
-
-  // Efectos
-  useEffect(() => {
-    setCurrentView('dashboard');
-
-    // Simular carga de datos
-    const timer = setTimeout(() => {
-      setDashboardLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [setCurrentView]);
-
-  // Handlers
-  const handleActionClick = (action: QuickAction) => {
-    console.log('Action clicked:', action);
-    // Implementar navegación según action.action
+  const handleOpenSpeakerDisplay = () => {
+    // Abrir pantalla del orador en nueva ventana
+    window.open('/speaker-display', '_blank', 'fullscreen=yes');
   };
 
-  const handlePresentationSelect = (presentation: RecentPresentation) => {
-    console.log('Presentation selected:', presentation);
-    // Navegar a la presentación
+  const handleStartPresentation = () => {
+    // TODO: Implementar inicio de presentación
+    console.log('Iniciar presentación');
   };
 
-  const handleRefreshData = () => {
-    setDashboardLoading(true);
-    // Simular refresh
-    setTimeout(() => setDashboardLoading(false), 1000);
-  };
-
-  const handleConfigureDashboard = () => {
-    console.log('Configure dashboard');
-    // Abrir configuración del dashboard
-  };
-
-  const handleFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      document.documentElement.requestFullscreen();
-    }
+  const handleManageMedia = () => {
+    // TODO: Implementar gestión de medios
+    console.log('Gestionar medios');
   };
 
   return (
-    <Container size="xl" py="md">
-      <LoadingOverlay visible={isLoading || dashboardLoading} />
-
-      {/* Header del Dashboard */}
+    <Container size="xl">
       <Group justify="space-between" mb="xl">
         <div>
-          <Title order={1} size="h2" mb="xs">
-            Dashboard
-          </Title>
-          <Text c="dimmed" size="sm">
-            Bienvenido, {currentUser?.name || 'Usuario'}. Hub central de tu
-            aplicación de presentaciones.
+          <Title order={1}>Dashboard de Control</Title>
+          <Text c="dimmed" size="lg">
+            Bienvenido, {currentUser?.displayName}
           </Text>
         </div>
-
-        <Group gap="xs">
-          <Tooltip label="Actualizar datos">
-            <ActionIcon
-              variant="default"
-              size="lg"
-              onClick={handleRefreshData}
-              loading={dashboardLoading}
-            >
-              <IconRefresh size={18} />
+        
+        <Group>
+          <Tooltip label="Configuración">
+            <ActionIcon variant="light" size="lg">
+              <IconSettings size={20} />
             </ActionIcon>
           </Tooltip>
-
-          <Tooltip label="Pantalla completa">
-            <ActionIcon variant="default" size="lg" onClick={handleFullscreen}>
-              <IconMaximize size={18} />
-            </ActionIcon>
-          </Tooltip>
-
-          <Tooltip label="Configurar dashboard">
-            <ActionIcon
-              variant="default"
-              size="lg"
-              onClick={handleConfigureDashboard}
-            >
-              <IconSettings size={18} />
+          
+          <Tooltip label="Actualizar">
+            <ActionIcon variant="light" size="lg">
+              <IconRefresh size={20} />
             </ActionIcon>
           </Tooltip>
         </Group>
       </Group>
 
-      {/* Grid de Widgets */}
       <Grid>
-        {/* Fila 1: Acciones rápidas y Estado del sistema */}
+        {/* Panel de Control Principal */}
         <Grid.Col span={{ base: 12, md: 8 }}>
-          <QuickActionsWidget
-            actions={quickActions}
-            onActionClick={handleActionClick}
-          />
+          <Stack gap="lg">
+            {/* Acciones Rápidas */}
+            <Card withBorder shadow="sm" p="lg">
+              <Title order={3} mb="md">Acciones Rápidas</Title>
+              <Grid>
+                <Grid.Col span={6}>
+                  <Button
+                    fullWidth
+                    leftSection={<IconPresentation size={20} />}
+                    size="lg"
+                    onClick={handleStartPresentation}
+                  >
+                    Iniciar Presentación
+                  </Button>
+                </Grid.Col>
+                
+                <Grid.Col span={6}>
+                  <Button
+                    fullWidth
+                    leftSection={<IconMaximize size={20} />}
+                    variant="light"
+                    size="lg"
+                    onClick={handleOpenSpeakerDisplay}
+                  >
+                    Pantalla Orador
+                  </Button>
+                </Grid.Col>
+                
+                <Grid.Col span={6}>
+                  <Button
+                    fullWidth
+                    leftSection={<IconVideo size={20} />}
+                    variant="outline"
+                    size="lg"
+                    onClick={handleManageMedia}
+                  >
+                    Gestionar Videos
+                  </Button>
+                </Grid.Col>
+                
+                <Grid.Col span={6}>
+                  <Button
+                    fullWidth
+                    leftSection={<IconPhoto size={20} />}
+                    variant="outline"
+                    size="lg"
+                    onClick={handleManageMedia}
+                  >
+                    Gestionar Imágenes
+                  </Button>
+                </Grid.Col>
+              </Grid>
+            </Card>
+
+            {/* Estado de la Reunión */}
+            <Card withBorder shadow="sm" p="lg">
+              <Title order={3} mb="md">Estado de la Reunión</Title>
+              <Group justify="space-between">
+                <div>
+                  <Text size="lg" fw={500}>
+                    {currentTemplate?.name || 'Sin plantilla seleccionada'}
+                  </Text>
+                  <Text c="dimmed">
+                    Duración total: {currentTemplate?.totalDuration || 0} min
+                  </Text>
+                </div>
+                
+                <Group>
+                  <IconUsers size={24} />
+                  <Text size="sm" c="dimmed">
+                    {timerState.isRunning ? 'En progreso' : 'Sin iniciar'}
+                  </Text>
+                </Group>
+              </Group>
+            </Card>
+          </Stack>
         </Grid.Col>
 
+        {/* Panel de Información */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <SystemStatusWidget
-            status={systemStatus}
-            onRefresh={handleRefreshData}
-            onViewDetails={() => console.log('View system details')}
-          />
-        </Grid.Col>
+          <Stack gap="lg">
+            {/* Información del Sistema */}
+            <Card withBorder shadow="sm" p="lg">
+              <Title order={4} mb="md">Sistema</Title>
+              <Stack gap="xs">
+                <Group justify="space-between">
+                  <Text size="sm">Usuario:</Text>
+                  <Text size="sm" fw={500}>{currentUser?.role}</Text>
+                </Group>
+                
+                <Group justify="space-between">
+                  <Text size="sm">Sesión:</Text>
+                  <Text size="sm" c="green">Activa</Text>
+                </Group>
+                
+                <Group justify="space-between">
+                  <Text size="sm">Cronómetro:</Text>
+                  <Text size="sm" c={timerState.isRunning ? 'green' : 'gray'}>
+                    {timerState.isRunning ? 'Ejecutándose' : 'Detenido'}
+                  </Text>
+                </Group>
+              </Stack>
+            </Card>
 
-        {/* Fila 2: Presentaciones recientes y Próximas reuniones */}
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <RecentPresentationsWidget
-            presentations={recentPresentations}
-            onPresentationSelect={handlePresentationSelect}
-            onViewAll={() => console.log('View all presentations')}
-          />
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <UpcomingMeetingsWidget
-            meetings={upcomingMeetings}
-            onMeetingSelect={meeting =>
-              console.log('Meeting selected:', meeting)
-            }
-            onPrepare={meetingId => console.log('Prepare meeting:', meetingId)}
-          />
-        </Grid.Col>
-
-        {/* Fila 3: Biblioteca de contenido y Vista previa displays */}
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <ContentLibraryWidget
-            stats={contentStats}
-            onSyncContent={() => console.log('Sync content')}
-            onViewLibrary={() => console.log('View library')}
-          />
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 8 }}>
-          <DisplayPreviewWidget
-            displays={displays}
-            onDisplaySelect={display =>
-              console.log('Display selected:', display)
-            }
-            onConfigureDisplays={() => console.log('Configure displays')}
-          />
-        </Grid.Col>
-
-        {/* Fila 4: Notificaciones (el cronómetro está ahora en el sidebar) */}
-        <Grid.Col span={{ base: 12, md: 12 }}>
-          <NotificationsWidget
-            notifications={notifications}
-            onNotificationRead={id => console.log('Mark as read:', id)}
-            onNotificationAction={notification =>
-              console.log('Notification action:', notification)
-            }
-            onClearAll={() => console.log('Clear all notifications')}
-          />
+            {/* Próximas Funcionalidades */}
+            <Card withBorder shadow="sm" p="lg">
+              <Title order={4} mb="md">Próximas Funcionalidades</Title>
+              <Stack gap="xs">
+                <Text size="sm" c="dimmed">• Biblioteca de medios</Text>
+                <Text size="sm" c="dimmed">• Presentaciones automáticas</Text>
+                <Text size="sm" c="dimmed">• Reportes de reuniones</Text>
+                <Text size="sm" c="dimmed">• Configuración avanzada</Text>
+              </Stack>
+            </Card>
+          </Stack>
         </Grid.Col>
       </Grid>
     </Container>

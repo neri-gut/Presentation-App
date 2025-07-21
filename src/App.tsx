@@ -19,7 +19,6 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import * as tauriUpdater from '@tauri-apps/plugin-updater';
 import {
   JSX,
-  lazy,
   LazyExoticComponent,
   Suspense,
   useEffect,
@@ -40,7 +39,6 @@ import LanguageHeaders from './components/LanguageHeaders';
 import { ScrollToTop } from './components/ScrollToTop';
 import { useTauriContext } from './tauri/TauriProvider';
 import { TitleBar } from './tauri/TitleBar';
-import ExampleView from './views/ExampleView';
 import FallbackAppRender from './views/FallbackErrorBoundary';
 import FallbackSuspense from './views/FallbackSuspense';
 import Dashboard from './pages/main/Dashboard';
@@ -51,8 +49,6 @@ import { SidebarTimerWidget } from './pages/main/widgets/SidebarTimerWidget';
 import { useUserStore } from './stores/userStore';
 import { IconLogout, IconUser as IconUserProfile } from '@tabler/icons-react';
 import { useResizableAside } from './hooks/useResizableAside';
-// if some views are large, you can use lazy loading to reduce the initial app load time
-const LazyView = lazy(() => import('./views/LazyView'));
 
 // imported views need to be added to the `views` list variable
 interface View {
@@ -73,7 +69,7 @@ export default function () {
   const currentUser = session.currentUser;
 
   // Hook para sidebar redimensionable
-  const { width, ResizeHandle, asideProps } = useResizableAside({
+  const { ResizeHandle, asideProps } = useResizableAside({
     initialWidth: 350,
     minWidth: 250,
     maxWidthPercent: 0.75
@@ -83,13 +79,6 @@ export default function () {
   const views: View[] = isAuthenticated ? [
     { component: Dashboard, path: '/dashboard', name: 'Dashboard' },
     ...(isAdmin() ? [{ component: UserManagementPage, path: '/users', name: 'Usuarios' }] : []),
-    { component: ExampleView, path: '/example-view', name: t('ExampleView') },
-    {
-      component: () => <Text>Woo, routing works</Text>,
-      path: '/example-view-2',
-      name: 'Test Routing',
-    },
-    { component: LazyView, path: '/lazy-view', name: 'Lazy Load' },
   ] : [];
 
   // Special fullscreen routes that don't use the main app layout
